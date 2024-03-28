@@ -1,0 +1,27 @@
+### python ###
+__pycache__
+.env
+env
+venv
+## for fresh install
+wiz_fastapi.db 
+
+### react ###
+.DS_*
+*.log
+logs
+**/*.backup.*
+**/*.back.*
+
+node_modules
+bower_components
+
+*.sublime*
+
+psd
+thumb
+sketch
+package-lock.json
+
+# dirs
+wiz-react/build

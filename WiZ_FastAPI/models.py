@@ -11,6 +11,7 @@ class Bulb(Base):
     state = Column(Integer, nullable=False, default=-1)
     scene_id = Column(Integer, nullable=False, default=0)
     scene = Column(String(32), nullable=True)
+    dimming = Column(Integer, nullable=True, default=255)
 
     def __repr__(self):
         return f'Bulb(ip={self.ip}, name={self.name}, state={self.state}, scene_id={self.scene_id}, scene={self.scene})'

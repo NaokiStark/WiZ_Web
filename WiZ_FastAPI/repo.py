@@ -36,9 +36,9 @@ def edit_bulb(db, ip, name):
     db.commit()
 
 
-def update_bulb_state(db, ip, state, scene_id, scene):
+def update_bulb_state(db, ip, state, scene_id, scene, dimming):
     db.query(models.Bulb).filter(models.Bulb.ip == ip).update(
-        {models.Bulb.state: state, models.Bulb.scene_id: scene_id, models.Bulb.scene: scene})
+        {models.Bulb.state: state, models.Bulb.scene_id: scene_id, models.Bulb.scene: scene, models.Bulb.dimming: dimming})
     db.commit()
 
 

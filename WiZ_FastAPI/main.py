@@ -6,12 +6,15 @@ from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 import uvicorn
 from sqlalchemy.orm import Session
+import sys
 
 import db
 import models
 import repo
 import wiz
 from schemas import BulbInput
+
+ipAddr = sys.argv[1] if len(sys.argv) > 1  else "192.168.1.255"
 
 app = FastAPI()
 
@@ -39,7 +42,7 @@ if os.path.exists('../wiz-react/build'):
 @app.get("/wiz/scan")
 async def scan_bulbs(db: Session = Depends(db.get_db)):
     try:
-        bulbs = await wiz.scan(db)
+        bulbs = await wiz.scan(db, ipAddressRange=ipAddr)
         print(f'scan: {bulbs}')
         return {'bulbs': bulbs}
     except Exception as error:
@@ -104,6 +107,19 @@ async def toggle_bulb_scene(ip_or_name: str, scene_id: int, db: Session = Depend
     except Exception as error:
         return {'error': f"Cannot toggle scene '{ip_or_name}': {error}"}
 
+@app.get("/wiz/dimm/{ip_or_name}/{dimm_lvl}")
+async def change_dimm(ip_or_name: str, dimm_lvl:int, db: Session = Depends(db.get_db)):
+    try:
+        bulbs = []
+        db_bulbs = repo.get_online_bulbs(db) if ip_or_name == 'all' else repo.get_bulbs(db, ip_or_name)
+        for bulb in db_bulbs:
+            bulbs.append(await wiz.dim(bulb.ip, dimm_lvl, bulb.scene_id, db))
+
+        print(f'dim: {bulbs}, lvl: {dimm_lvl}')
+        return {'bulbs': bulbs}
+    except Exception as error:
+            return {'error': f"Cannot change dimming '{ip_or_name}': {error}"}
+
 
 @app.get("/crud/bulbs")
 def get_all_bulbs(db: Session = Depends(db.get_db)):
@@ -117,6 +133,7 @@ def get_bulb(ip: str, db: Session = Depends(db.get_db)):
     if not bulb:
         return Response(status_code=status.HTTP_404_NOT_FOUND)
     return bulb
+
 
 
 @app.put("/crud/bulbs/{ip}")
@@ -143,4 +160,7 @@ async def react_app(req: Request, rest_of_path: str):
 
 
 if __name__ == "__main__":
+    
+    print(f"Scan IP address: {0}", ipAddr)
+
     uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True, log_level="info")
